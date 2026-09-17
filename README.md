@@ -1,7 +1,5 @@
 # Marquee_Console
 
-Sky's command handling and keyboard input (C++17, Windows).
-
 ## Files
 
 - `include/marquee/commands.hpp`, `src/commands.cpp`: shared state, validation, command execution, help.
@@ -58,7 +56,3 @@ if not exist build mkdir build
 cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\commands.cpp src\input.cpp src\input_windows.cpp tests\command_tests.cpp /Fo:build\ /Fe:build\command_tests.exe
 build\command_tests.exe
 ```
-
-For the final application, compile the three `src` files with your teammates'
-sources and their main function, excluding `tests/command_tests.cpp`.
-Run interactive tests once the display and scheduler are connected.
