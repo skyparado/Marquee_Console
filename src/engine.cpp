@@ -39,10 +39,11 @@ void Engine::run() {
 
         render();
 
+        // this is where the position of the text is updated for the scrolling bit, keeps things static if u hit stop
         if (current_state.status == Status::Running) {
             std::lock_guard<std::mutex> lock(shared_state_.mutex);
 
-            // Compute total cycle length: Screen Width + Length of ASCII Art Row
+            // compute total cycle length: Screen Width + Length of ASCII Art Row
             int text_len = 0;
             if (!shared_state_.value.text.empty()) {
                 text_len = static_cast<int>(generate_ascii_art(shared_state_.value.text)[0].length());
