@@ -1,0 +1,26 @@
+# Build outputs
+build/
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Debug / logs
+*.log
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
