@@ -1,3 +1,4 @@
+#include "marquee/ascii_art.hpp"
 #include "marquee/commands.hpp"
 #include "marquee/input.hpp"
 
@@ -64,5 +65,16 @@ int main() {
     check(batch.limit_reached && batch.lines.size() == 2);
     for (char key : std::string("help\r")) input.accept(key, batch);
     check(batch.lines.size() == 3 && batch.lines.back() == "help");
-    std::cout << "All command and input-buffer tests passed.\n";
+    // scroll math: the banner must leave the screen entirely before it wraps,
+    // which only holds when the cycle covers console width + banner width
+    const int width = 20;
+    const std::string banner = "ABCDE";
+    const int cycle = width + static_cast<int>(banner.size());
+    check(advance_position(cycle - 1, cycle) == 0);
+    check(advance_position(0, 0) == 0);
+    check(compute_scrolled_line(banner, 0, width) == banner + std::string(width - 5, ' '));
+    check(compute_scrolled_line(banner, width, width).find_first_not_of(' ') == std::string::npos);
+    check(compute_scrolled_line("", 0, width) == std::string(width, ' '));
+
+    std::cout << "All command, input-buffer, and scroll tests passed.\n";
 }

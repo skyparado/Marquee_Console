@@ -1,7 +1,7 @@
 #pragma once
 
 #include "marquee/commands.hpp"
-#include "marquee/input.hpp" // Added to access InputBuffer
+#include "marquee/input.hpp"
 
 #include <atomic>
 #include <thread>
@@ -11,7 +11,6 @@ namespace marquee {
 class Engine {
 
 public: 
-    // Updated constructor to accept InputBuffer
     Engine(SharedState& shared_state, InputBuffer& input_buffer);
     ~Engine();
 
@@ -23,7 +22,7 @@ private:
     void render();
 
     SharedState& shared_state_;
-    InputBuffer& input_buffer_; // Added reference
+    InputBuffer& input_buffer_;
 
     std::atomic<bool> shutdown_{false};
     std::thread worker_;

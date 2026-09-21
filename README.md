@@ -5,6 +5,10 @@
 - `include/marquee/commands.hpp`, `src/commands.cpp`: shared state, validation, command execution, help.
 - `include/marquee/input.hpp`, `src/input.cpp`: editable input buffer.
 - `src/input_windows.cpp`: non-blocking Windows console polling with `_kbhit` / `_getch`.
+- `include/marquee/display.hpp`, `src/display.cpp`: header, marquee, message, and prompt rendering.
+- `include/marquee/ascii_art.hpp`, `src/ascii_art.cpp`: ASCII glyph font and scroll math.
+- `include/marquee/engine.hpp`, `src/engine.cpp`: animation thread; owns all console output.
+- `src/main.cpp`: application entry point; polls input, runs commands, owns shutdown.
 - `tests/command_tests.cpp`: component test entry point; this is not the application's main.
 
 ## Commands
@@ -53,6 +57,13 @@ From an x64 Native Tools Command Prompt for Visual Studio, in the repository roo
 
 ```bat
 if not exist build mkdir build
-cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\commands.cpp src\input.cpp src\input_windows.cpp tests\command_tests.cpp /Fo:build\ /Fe:build\command_tests.exe
+cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\main.cpp src\commands.cpp src\display.cpp src\ascii_art.cpp src\engine.cpp src\input.cpp src\input_windows.cpp /Fo:build\ /Fe:build\marquee.exe
+build\marquee.exe
+```
+
+Tests:
+
+```bat
+cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\commands.cpp src\ascii_art.cpp src\input.cpp src\input_windows.cpp tests\command_tests.cpp /Fo:build\ /Fe:build\command_tests.exe
 build\command_tests.exe
 ```

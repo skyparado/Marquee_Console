@@ -52,8 +52,9 @@ void Engine::run() {
 
             std::vector<std::string> ascii_art = generate_ascii_art(state.text);
 
-            // width of text based on longest line in ASCII art to fit the console width
-            int text_width = 0;
+            // width of the rendered banner, so the text scrolls all the way
+            // off-screen before it wraps back around
+            int text_width = static_cast<int>(ascii_art[0].size());
             int cycle_length = console_width + text_width;
 
             {
@@ -61,15 +62,15 @@ void Engine::run() {
                 std::lock_guard<std::mutex> lock(shared_state_.mutex);
                 shared_state_.value.position = advance_position(state.position, cycle_length);
             }
-
-            render();
-            //for set_speed command
-            std::this_thread::sleep_for(std::chrono::milliseconds(state.speed_ms));
         }
 
-        else {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
-            }
+        // render every frame, not just while running, so typed characters echo
+        // at the prompt while the marquee is stopped
+        render();
+
+        //for set_speed command
+        std::this_thread::sleep_for(std::chrono::milliseconds(
+            state.status == Status::Running ? state.speed_ms : 50));
         }
     }
 
