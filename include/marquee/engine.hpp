@@ -12,7 +12,7 @@ class Engine {
 
 public: 
     // Updated constructor to accept InputBuffer
-    Engine(SharedState& shared_state, const InputBuffer& input_buffer);
+    Engine(SharedState& shared_state, InputBuffer& input_buffer);
     ~Engine();
 
     void start();
@@ -23,7 +23,7 @@ private:
     void render();
 
     SharedState& shared_state_;
-    const InputBuffer& input_buffer_; // Added reference
+    InputBuffer& input_buffer_; // Added reference
 
     std::atomic<bool> shutdown_{false};
     std::thread worker_;
