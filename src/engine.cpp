@@ -6,6 +6,28 @@
 #include <thread>
 #include <vector>
 
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
+int get_console_width() {
+#if defined(_WIN32)
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+        return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    }
+#else
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 && w.ws_col > 0) {
+        return w.ws_col;
+    }
+#endif
+    return 80; // Default width if unable to determine
+}
+
 namespace marquee {
 
 //constructor that accepts InputBuffer, removed const
@@ -84,7 +106,7 @@ void Engine::render() {
 
     render_header();
 
-    render_ascii_marquee(state.text, state.position, 80);
+    render_ascii_marquee(state.text, state.position, get_console_width());
     render_response_message(state.last_message);
     render_prompt(input_buffer_.current_line());
     }

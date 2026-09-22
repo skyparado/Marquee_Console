@@ -110,23 +110,36 @@ std::vector<std::string> generate_ascii_art(const std::string& text) {
 
 // now we compute scroll line so that the "animation" looks seamless
 std::string compute_scrolled_line(const std::string& text, int position, int console_width) {
-    std::string display_line(console_width, ' ');
-    if (text.empty()) return display_line;
+    if (text.empty() || console_width <= 0) return "";
 
+    // compute the usable width by leaving the last column free to prevent terminal auto-wrapping
+    int usable_width = (console_width > 1) ? console_width - 1 : 1;
     int len = static_cast<int>(text.length());
     // total cycle length includes both console width AND the text length so that
-    // the text can scroll completely off-screen before wrapping around!
+    // the text can scroll completely off-screen before wrapping around
     int cycle_len = console_width + len;
+
+    std::string line(usable_width, ' ');
+    int max_col = -1; // track the rightmost visible character to trim trailing spaces
 
     for (int i = 0; i < len; ++i) {
         int col = (position + i) % cycle_len;
         // this is to make sure we only render characters that fall strictly inside the visible console width
         // aka: don't render the ones "off-screen" to make the wrap around effect look real
-        if (col >= 0 && col < console_width) {
-            display_line[col] = text[i];
+        if (col >= 0 && col < usable_width) // // only render characters that fall strictly inside the visible console width
+        {
+            // place the character in the correct position in the line, and update max_col if it's a visible character
+            line[col] = text[i];
+            if (text[i] != ' ') {
+                max_col = std::max(max_col, col);
+            }
         }
     }
-    return display_line;
+
+    // Return empty string if no visible characters, otherwise trim trailing spaces
+    if (max_col < 0) return "";
+    line.resize(max_col + 1);
+    return line;
 }
 
 // this is the function that akshually moves the text along the screen, 
