@@ -17,6 +17,10 @@ struct State {
     DisplayMode display_mode = DisplayMode::Text;
     bool exit_requested = false;
     std::string last_message = ""; // store response messages so i can display them (this is for the command responses)
+    // Copy of the line being typed. The InputBuffer belongs to the input thread,
+    // so the engine must not read it directly; the input thread republishes it
+    // here under the mutex and the engine reads it from its snapshot.
+    std::string input_line = "";
 };
 
 struct SharedState {

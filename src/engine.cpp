@@ -62,12 +62,14 @@ void Engine::stop() {
 
 //main animation logic
 void Engine::run() {
-    constexpr int console_width = 80;
-
     while (!shutdown_) {
         State state = shared_state_.snapshot();
 
         if (state.exit_requested) break;
+
+        // Must match the width the renderer actually draws with, or the banner
+        // wraps back around before it has crossed the visible screen.
+        const int console_width = get_console_width();
 
         //generate ascii art and correct its position
         if (state.status == Status::Running) {
@@ -91,8 +93,16 @@ void Engine::run() {
         render();
 
         //for set_speed command
-        std::this_thread::sleep_for(std::chrono::milliseconds(
-            state.status == Status::Running ? state.speed_ms : 50));
+        // Sleep in short slices instead of one long block: a single sleep_for of
+        // speed_ms would make stop() wait out the whole interval (up to ~24 days
+        // at the maximum accepted speed) before the thread could be joined.
+        const int total_ms = state.status == Status::Running ? state.speed_ms : 50;
+        constexpr int slice_ms = 20;
+        for (int slept = 0; slept < total_ms && !shutdown_; slept += slice_ms) {
+            const int remaining = total_ms - slept;
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(remaining < slice_ms ? remaining : slice_ms));
+        }
         }
     }
 
@@ -108,7 +118,9 @@ void Engine::render() {
 
     render_ascii_marquee(state.text, state.position, get_console_width());
     render_response_message(state.last_message);
-    render_prompt(input_buffer_.current_line());
+    // Read the published copy, not input_buffer_: that buffer is mutated by the
+    // input thread and reading it here would be an unsynchronized data race.
+    render_prompt(state.input_line);
     }
 
 }

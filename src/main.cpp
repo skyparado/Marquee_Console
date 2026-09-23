@@ -47,6 +47,10 @@ int main() {
                 if (batch.limit_reached)
                     shared.value.last_message = "Input too long; press Escape to clear the line.";
 
+                // Publish the in-progress line for the engine to render. The engine
+                // must never touch the InputBuffer itself; it belongs to this thread.
+                shared.value.input_line = input.current_line();
+
                 exiting = shared.value.exit_requested;
             }
             if (exiting)

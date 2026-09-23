@@ -5,11 +5,16 @@
 #include <iostream>
 #include <stdexcept>
 
-void check(bool condition) {
+int line_of_last_check = 0;
+
+// __LINE__ is captured so a failure names the assertion that broke.
+#define check(condition) do { line_of_last_check = __LINE__; check_impl(condition); } while (0)
+
+void check_impl(bool condition) {
     if (!condition) throw std::runtime_error("Test failed");
 }
 
-int main() {
+void run_tests() {
     using namespace marquee;
     SharedState state;
     check(state.snapshot().status == Status::Stopped);
@@ -72,9 +77,28 @@ int main() {
     const int cycle = width + static_cast<int>(banner.size());
     check(advance_position(cycle - 1, cycle) == 0);
     check(advance_position(0, 0) == 0);
-    check(compute_scrolled_line(banner, 0, width) == banner + std::string(width - 5, ' '));
-    check(compute_scrolled_line(banner, width, width).find_first_not_of(' ') == std::string::npos);
-    check(compute_scrolled_line("", 0, width) == std::string(width, ' '));
+    // Rendered rows are trimmed: trailing padding is dropped (the renderer's
+    // \033[K clears the rest of the line) and the last column is never used,
+    // so a glyph cannot fill it and make the terminal auto-wrap.
+    check(compute_scrolled_line(banner, 0, width) == banner);
+    check(compute_scrolled_line(banner, width, width).empty());
+    check(compute_scrolled_line("", 0, width).empty());
+    check(static_cast<int>(compute_scrolled_line(banner, 0, width).size()) <= width - 1);
+    // The banner must sit one column further right after a single step.
+    check(compute_scrolled_line(banner, 1, width) == " " + banner);
 
     std::cout << "All command, input-buffer, and scroll tests passed.\n";
+}
+
+// An uncaught throw from check() terminated the process with no output at all,
+// which made a failing suite look like a crash. Report the failure instead.
+int main() {
+    try {
+        run_tests();
+    } catch (const std::exception& ex) {
+        std::cout << "FAILED at " << __FILE__ << ":" << line_of_last_check
+                  << " - " << ex.what() << "\n";
+        return 1;
+    }
+    return 0;
 }
