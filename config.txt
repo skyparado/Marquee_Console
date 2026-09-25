@@ -1,0 +1,13 @@
+# Text shown when the program starts. Wrap in quotes to keep leading/trailing spaces.
+marquee_text=CSOPESY
+
+# Refresh rate: milliseconds between marquee steps. Lower is faster.
+# Same as typing set_speed. Accepts 1 to 2147483647.
+refresh_rate_ms=100
+
+# Polling rate: milliseconds between keyboard checks. Higher means typing lags.
+# Accepts 1 to 1000.
+polling_rate_ms=20
+
+# true starts scrolling immediately; false waits for start_marquee.
+start_running=false

@@ -34,6 +34,7 @@ struct CommandResult {
     std::string message;
 };
 
+std::string_view trim(std::string_view text);
 std::string_view help_text();
 CommandResult execute_command(std::string_view line, SharedState& shared);
 

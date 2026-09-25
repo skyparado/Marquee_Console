@@ -22,7 +22,7 @@ if not exist build\obj mkdir build\obj
 
 cl /nologo /std:c++17 /EHsc /W4 /O2 /Iinclude ^
    src\main.cpp src\commands.cpp src\display.cpp src\ascii_art.cpp ^
-   src\engine.cpp src\input.cpp src\input_windows.cpp ^
+   src\engine.cpp src\input.cpp src\input_windows.cpp src\config.cpp ^
    /Fo:build\obj\ /Fe:build\marquee.exe
 set "STATUS=%ERRORLEVEL%"
 

@@ -18,7 +18,7 @@ if not exist build mkdir build
 if not exist build\obj mkdir build\obj
 
 cl /nologo /std:c++17 /EHsc /W4 /Iinclude ^
-   src\commands.cpp src\ascii_art.cpp src\input.cpp src\input_windows.cpp ^
+   src\commands.cpp src\ascii_art.cpp src\input.cpp src\input_windows.cpp src\config.cpp ^
    tests\command_tests.cpp ^
    /Fo:build\obj\ /Fe:build\command_tests.exe
 set "STATUS=%ERRORLEVEL%"

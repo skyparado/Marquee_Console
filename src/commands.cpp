@@ -5,14 +5,12 @@
 #include <system_error>
 
 namespace marquee {
-namespace {
 std::string_view trim(std::string_view text) {
     while (!text.empty() && std::isspace(static_cast<unsigned char>(text.front())))
         text.remove_prefix(1);
     while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back())))
         text.remove_suffix(1);
     return text;
-}
 }
 
 State SharedState::snapshot() const {

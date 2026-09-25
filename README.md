@@ -8,7 +8,8 @@
 - `include/marquee/display.hpp`, `src/display.cpp`: header, marquee, message, and prompt rendering.
 - `include/marquee/ascii_art.hpp`, `src/ascii_art.cpp`: ASCII glyph font and scroll math.
 - `include/marquee/engine.hpp`, `src/engine.cpp`: animation thread; owns all console output.
-- `src/main.cpp`: application entry point; polls input, runs commands, owns shutdown.
+- `include/marquee/config.hpp`, `src/config.cpp`: reads `config.txt` settings at startup.
+- `src/main.cpp`: application entry point (`main()` lives here); loads config, polls input, runs commands, owns shutdown.
 - `tests/command_tests.cpp`: component test entry point; this is not the application's main.
 
 ## Commands
@@ -25,8 +26,26 @@
 
 Commands are case-sensitive. Blank lines do nothing. Errors return a message and
 leave state unchanged. Empty/whitespace-only text and control characters are rejected.
-Default state: STOPPED, `Hello, world!`, 100 ms, position 0, text display mode.
+Default state: STOPPED, `CSOPESY`, 100 ms, position 0, text display mode.
 The display owner may set `display_mode` to `AsciiGraphics`; there is no additional mode command in the assignment.
+
+## Configuration (`config.txt`)
+
+Settings live in `config.txt` in the repository root. Edit, save, and restart the
+program; no recompiling. Format is `key=value`; `#` starts a comment.
+
+| Key | Meaning | Accepted values | Default |
+| --- | --- | --- | --- |
+| `marquee_text` | Text shown at startup (same rules as `set_text`) | non-empty text; quotes keep edge spaces | `CSOPESY` |
+| `refresh_rate_ms` | Milliseconds between marquee steps (same as `set_speed`) | 1 to 2147483647 | `100` |
+| `polling_rate_ms` | Milliseconds between keyboard checks | 1 to 1000 | `20` |
+| `start_running` | Start scrolling immediately | `true` / `false` | `false` |
+
+The program looks in the working directory, then beside the exe, then one folder
+above the exe, so it finds the root `config.txt` whether it is launched from the
+repository root, from `build\`, or by an IDE. The first frame shows which file was
+loaded. A bad line is skipped with an on-screen warning and the default is kept; a
+missing file means built-in defaults.
 
 ## Integration
 
@@ -57,13 +76,13 @@ From an x64 Native Tools Command Prompt for Visual Studio, in the repository roo
 
 ```bat
 if not exist build mkdir build
-cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\main.cpp src\commands.cpp src\display.cpp src\ascii_art.cpp src\engine.cpp src\input.cpp src\input_windows.cpp /Fo:build\ /Fe:build\marquee.exe
+cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\main.cpp src\commands.cpp src\display.cpp src\ascii_art.cpp src\engine.cpp src\input.cpp src\input_windows.cpp src\config.cpp /Fo:build\ /Fe:build\marquee.exe
 build\marquee.exe
 ```
 
 Tests:
 
 ```bat
-cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\commands.cpp src\ascii_art.cpp src\input.cpp src\input_windows.cpp tests\command_tests.cpp /Fo:build\ /Fe:build\command_tests.exe
+cl /nologo /std:c++17 /EHsc /W4 /Iinclude src\commands.cpp src\ascii_art.cpp src\input.cpp src\input_windows.cpp src\config.cpp tests\command_tests.cpp /Fo:build\ /Fe:build\command_tests.exe
 build\command_tests.exe
 ```

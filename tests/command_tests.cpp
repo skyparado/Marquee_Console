@@ -1,8 +1,11 @@
 #include "marquee/ascii_art.hpp"
 #include "marquee/commands.hpp"
+#include "marquee/config.hpp"
 #include "marquee/input.hpp"
 
+#include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 int line_of_last_check = 0;
@@ -87,7 +90,39 @@ void run_tests() {
     // The banner must sit one column further right after a single step.
     check(compute_scrolled_line(banner, 1, width) == " " + banner);
 
-    std::cout << "All command, input-buffer, and scroll tests passed.\n";
+    // config.txt: a clean file (with a Notepad BOM and Windows line endings)
+    // applies every setting and produces no warnings
+    {
+        SharedState cfg;
+        std::istringstream file("\xEF\xBB\xBF# comment\r\n\n"
+                                "marquee_text = Hello demo\r\n"
+                                "refresh_rate_ms=40\n"
+                                "polling_rate_ms=15\n"
+                                "start_running=true\n");
+        const ConfigResult result = apply_config(file, cfg);
+        const State s = cfg.snapshot();
+        check(result.warnings.empty());
+        check(s.text == "Hello demo" && s.speed_ms == 40 && s.status == Status::Running);
+        check(result.polling_rate_ms == 15);
+    }
+    // every bad line is skipped with its own warning and leaves the defaults alone
+    {
+        SharedState cfg;
+        std::istringstream file("refresh_rate_ms=fast\n"
+                                "polling_rate_ms=0\n"
+                                "start_running=yes\n"
+                                "colour=red\n"
+                                "no equals sign\n"
+                                "marquee_text=\n");
+        const ConfigResult result = apply_config(file, cfg);
+        const State s = cfg.snapshot();
+        const State defaults;
+        check(s.text == defaults.text && s.speed_ms == defaults.speed_ms && s.status == defaults.status);
+        check(result.polling_rate_ms == ConfigResult{}.polling_rate_ms);
+        check(std::count(result.warnings.begin(), result.warnings.end(), '\n') == 6);
+    }
+
+    std::cout << "All command, input-buffer, scroll, and config tests passed.\n";
 }
 
 // An uncaught throw from check() terminated the process with no output at all,
