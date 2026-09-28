@@ -1,0 +1,22 @@
+{
+    // Hides the C/C++ extension's "Run C/C++ File" play button in the editor
+    // title bar. That button ignores launch.json and tries to build and run the
+    // single active file, which cannot work for a multi-file project: it looks
+    // for src\main.exe, which nothing produces. Use F5 ("Run Marquee Console")
+    // instead. Turning it off also stops the extension from re-adding its
+    // "cl.exe build active file" task and stealing the default build task.
+    "C_Cpp.debugShortcut": false,
+
+    // Code Runner's default for C++ is "cd <file's folder> && g++ <file> -o ...".
+    // That fails three ways here: the g++ on PATH is MinGW 6.3 (no C++17), the
+    // include/ folder is never passed with -I, and only the active file is
+    // compiled. Point it at the real build instead, which uses MSVC, compiles
+    // every source file, and launches in a separate console window.
+    "code-runner.executorMap": {
+        "cpp": "cmd /c \"$workspaceRoot\\scripts\\run.bat\"",
+        "c": "cmd /c \"$workspaceRoot\\scripts\\run.bat\""
+    },
+    "code-runner.runInTerminal": true,
+    "code-runner.saveFileBeforeRun": true,
+    "code-runner.clearPreviousOutput": true
+}

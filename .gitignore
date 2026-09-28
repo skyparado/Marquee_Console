@@ -17,6 +17,17 @@ build/
 *.vcxproj.filters
 *.vcxproj.user
 
+# Bundled JDK / Java toolchains (not part of this C++ project)
+oracleJdk-*/
+jdk-*/
+jre-*/
+*.jar
+*.class
+.classpath
+.project
+bin/
+target/
+
 # Debug / logs
 *.log
 *.tmp
