@@ -1,20 +1,11 @@
 @echo off
-REM Builds build\marquee.exe and leaves nothing else behind.
+REM Builds build\marquee.exe using the installed MSVC toolchain.
 REM Usage: scripts\build.bat        (from the repository root, or anywhere)
 
 setlocal
 set "ROOT=%~dp0.."
-set "VCVARS=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-
-if not exist "%VCVARS%" (
-    echo ERROR: Could not find vcvars64.bat at:
-    echo   %VCVARS%
-    echo Install Visual Studio 2022 with the "Desktop development with C++" workload.
-    exit /b 1
-)
-
-REM "call" matters: without it the batch file transfers control and never returns.
-call "%VCVARS%" >nul
+call "%~dp0setup_msvc.bat"
+if errorlevel 1 exit /b 1
 
 cd /d "%ROOT%"
 if not exist build mkdir build
@@ -26,8 +17,7 @@ cl /nologo /std:c++17 /EHsc /W4 /O2 /Iinclude ^
    /Fo:build\obj\ /Fe:build\marquee.exe
 set "STATUS=%ERRORLEVEL%"
 
-REM Intermediates are not needed once the exe is linked.
-rd /s /q build\obj 2>nul
+REM Keep intermediate files in build\obj for inspection.
 
 if not "%STATUS%"=="0" (
     echo.
