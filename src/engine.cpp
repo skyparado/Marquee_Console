@@ -30,18 +30,17 @@ int get_console_width() {
 
 namespace marquee {
 
-//constructor that accepts InputBuffer, removed const
 Engine::Engine(SharedState& shared_state, InputBuffer& input_buffer)
              : shared_state_(shared_state), input_buffer_(input_buffer) {}
 
 
-//destructor
+// stopping here guarantees the thread is joined before the members it uses go away
 Engine::~Engine() {
     stop();
     }
 
 
-//starts a new thread
+// starting twice is harmless: an already-joinable worker means one is running
 void Engine::start() {
     if (worker_.joinable())
         return;
@@ -51,7 +50,7 @@ void Engine::start() {
     }
 
 
-//stops the thread
+// signals the worker to finish and waits for it, so no thread outlives the engine
 void Engine::stop() {
     shutdown_ = true;
 
@@ -60,7 +59,7 @@ void Engine::stop() {
     }
 
 
-//main animation logic
+// advances the marquee on its own schedule and redraws the console
 void Engine::run() {
     using Clock = std::chrono::steady_clock;
     auto next_step = Clock::now();
@@ -103,7 +102,7 @@ void Engine::run() {
 }
 
 
-//renders marquee and other messages
+// draws one whole frame: header, marquee, response message, and prompt
 void Engine::render() {
     State state = shared_state_.snapshot();
 

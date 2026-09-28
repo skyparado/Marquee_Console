@@ -35,8 +35,8 @@ ConfigResult apply_config(std::istream& in, SharedState& shared) {
             const CommandResult applied = execute_command(command, shared);
             if (!applied.ok) warn(applied.message + " Kept the default.");
         } else if (key == "polling_rate_ms") {
-            // ponytail: capped at 1000 ms; past that typing is unusable, and a
-            // huge value would leave no way to type exit.
+            // capped at 1000 ms; past that typing is unusable, and a huge value
+            // would leave no way to type exit.
             int ms = 0;
             const auto parsed = std::from_chars(value.data(), value.data() + value.size(), ms);
             if (parsed.ec != std::errc{} || parsed.ptr != value.data() + value.size() || ms < 1 || ms > 1000)

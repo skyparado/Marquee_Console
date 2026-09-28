@@ -8,17 +8,17 @@
 
 namespace marquee {
 
-// this function resets the cursor to the top of the console, so we can overwrite the previous frame
+// moves the cursor to the top of the console, so the next frame overwrites the previous one
 void reset_cursor_to_top() {
     std::cout << "\033[H";
 }
 
-// this cleas the entire console screen, so we can start fresh with a new frame
+// clears the entire console screen, so each frame starts from a blank window
 void clear_entire_screen() {
     std::cout << "\033[2J";
 }
 
-// print header obvi
+// prints the welcome message, the group developers, and the version date
 void render_header() {
     std::cout << "Welcome to CSOPESY!\033[K\n\n";
     std::cout << "Group developers:\033[K\n";
@@ -29,10 +29,11 @@ void render_header() {
     std::cout << "Version date: Sept 20, 2026\033[K\n\n";
 }
 
-// okay now we combine all helper funcs from ascii_art here to do the marquee thing
+// combines the ascii_art helpers into the five rendered banner rows
 void render_ascii_marquee(const std::string& text, int position, int width) {
     std::cout << "\033[K\n\n\n";
-    // if the text input is not empty the ascii art is generated, otherwise just print empty lines (duh)
+    // blank rows keep the frame the same height when there is no text to draw,
+    // so nothing below the banner shifts up
     if (!text.empty()) {
         std::vector<std::string> ascii_banner = generate_ascii_art(text);
         for (int row = 0; row < 5; ++row) {
@@ -47,8 +48,8 @@ void render_ascii_marquee(const std::string& text, int position, int width) {
     std::cout << "\033[K\n\n";
 }
 
-// this is just so the command responses are printed on the screen,
-// also clears it after printing so that if the next command has no response it wont print anything
+// prints the last command's response; an empty message clears the line instead,
+// so a response never lingers after the next command
 void render_response_message(const std::string& message) {
     if (message.empty()) {
         std::cout << "\033[K\n";
@@ -62,7 +63,8 @@ void render_response_message(const std::string& message) {
     std::cout << "\033[K\n";
 }
 
-// this is to indicate where to type, clears it after each command is inputted 
+// prints the prompt and the line being typed; the trailing escape codes clear
+// the rest of the line and everything below it
 void render_prompt(const std::string& input_text) {
     std::cout << "Command> " << input_text << "\033[K\033[J" << std::flush;
 }

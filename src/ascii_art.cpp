@@ -8,7 +8,7 @@ namespace marquee {
 
 namespace {
 
-// font dictionary for ascii so i can just call each array and display them
+// font dictionary: each character maps to the five rows that draw it
 const std::unordered_map<char, std::vector<std::string>> RAW_ASCII_FONT = 
 {
     // A-Z Letters
@@ -70,7 +70,7 @@ const std::unordered_map<char, std::vector<std::string>> RAW_ASCII_FONT =
     {')', {"__  ", "\\ \\ ", " | |", " | |", "/_/ "}},
 };
 
-// pad each row of the glyph so all rows are even; keeps alignment consistent and pretty
+// pads every row of a glyph to the same width, so the five banner rows stay aligned
 std::vector<std::string> get_padded_glyph(const std::vector<std::string>& raw_glyph) {
     std::size_t max_len = 0;
     
@@ -89,15 +89,15 @@ std::vector<std::string> get_padded_glyph(const std::vector<std::string>& raw_gl
 
 } 
 
-// this is the actual function generating ascii art, calls the dictionary and the get_padded_glyph function
+// builds the five-row banner for a string, one glyph at a time
 std::vector<std::string> generate_ascii_art(const std::string& text) {
     std::vector<std::string> ascii_rows(5, "");
-    //loop through each inputted char, convert to uppercase, search for the glyph, then append to ascii_rows
     for (char ch : text) {
         char upper_ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
         auto it = RAW_ASCII_FONT.find(upper_ch);
-        
-        // this bit just checks if the char is in the dictionary, if not it uses the '?' glyph
+
+        // characters missing from the font fall back to '?' rather than being skipped,
+        // so the banner width still matches the text length
         const auto& raw_glyph = (it != RAW_ASCII_FONT.end()) ? it->second : RAW_ASCII_FONT.at('?');
 
         std::vector<std::string> glyph = get_padded_glyph(raw_glyph);
@@ -108,11 +108,12 @@ std::vector<std::string> generate_ascii_art(const std::string& text) {
     return ascii_rows;
 }
 
-// now we compute scroll line so that the "animation" looks seamless
+// windows one banner row at the current scroll offset, so the animation looks seamless
 std::string compute_scrolled_line(const std::string& text, int position, int console_width) {
     if (text.empty() || console_width <= 0) return "";
 
-    // compute the usable width by leaving the last column free to prevent terminal auto-wrapping
+    // the last column is left free: filling it makes the terminal auto-wrap, which
+    // costs an extra screen line per row and scrolls the whole frame
     int usable_width = (console_width > 1) ? console_width - 1 : 1;
     int len = static_cast<int>(text.length());
     // total cycle length includes both console width AND the text length so that
@@ -124,11 +125,10 @@ std::string compute_scrolled_line(const std::string& text, int position, int con
 
     for (int i = 0; i < len; ++i) {
         int col = (position + i) % cycle_len;
-        // this is to make sure we only render characters that fall strictly inside the visible console width
-        // aka: don't render the ones "off-screen" to make the wrap around effect look real
-        if (col >= 0 && col < usable_width) // // only render characters that fall strictly inside the visible console width
+        // only characters that land strictly inside the visible width are drawn;
+        // leaving the off-screen ones out is what makes the wrap-around look real
+        if (col >= 0 && col < usable_width)
         {
-            // place the character in the correct position in the line, and update max_col if it's a visible character
             line[col] = text[i];
             if (text[i] != ' ') {
                 max_col = std::max(max_col, col);
@@ -136,14 +136,15 @@ std::string compute_scrolled_line(const std::string& text, int position, int con
         }
     }
 
-    // Return empty string if no visible characters, otherwise trim trailing spaces
+    // trailing padding is dropped because the renderer's \033[K already clears
+    // the rest of the line; an entirely off-screen row becomes an empty string
     if (max_col < 0) return "";
     line.resize(max_col + 1);
     return line;
 }
 
-// this is the function that akshually moves the text along the screen, 
-// just increments it until it reaches the complete cycle length then wraps back around so we can keep looping
+// steps the marquee one column along, wrapping back to zero once a full cycle
+// has been covered so the scroll keeps looping
 int advance_position(int current_pos, int max_cycle) {
     if (max_cycle <= 0) return 0;
     return (current_pos + 1) % max_cycle;
